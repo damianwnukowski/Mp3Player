@@ -9,7 +9,7 @@
         Height="600" Width="400"
 		MinHeight="200" MinWidth="200"
         >
-		<DockPanel>
+	<DockPanel>
 		<Menu DockPanel.Dock="Top" >
 			<MenuItem Header="Open..." x:Name="OpenButton">
 				<MenuItem Header="Open File" Click="OpenButton_OnClick"></MenuItem>
@@ -26,11 +26,14 @@
 							<RowDefinition></RowDefinition>
 							<RowDefinition></RowDefinition>
 						</Grid.RowDefinitions>
-						<TextBox VerticalAlignment ="Center" Margin="1" IsReadOnly="True" Grid.Row="0"></TextBox>
+						<TextBox x:Name="TitleTextBox" VerticalAlignment ="Center" Margin="1" IsReadOnly="True" Grid.Row="0"></TextBox>
 						<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-							<Image x:Name="PlayButtonImage" Source="Resource Images/back.png" RenderOptions.BitmapScalingMode="Fant" Height="20" Margin="2"></Image>
-							<Image x:Name="PreviousButtonImage" Source="Resource Images/play-button.png" RenderOptions.BitmapScalingMode="Fant" Height="30" Margin="2"></Image>
-							<Image x:Name="NextButtonImage" Source="Resource Images/next.png" RenderOptions.BitmapScalingMode="Fant" Height="20" Margin="2"></Image>
+							<Image x:Name="PreviousButton" Source="Resource Images/back.png" RenderOptions.BitmapScalingMode="Fant" Height="20" Margin="2"></Image>
+							<Grid>
+								<Image x:Name="PlayButton" Source="Resource Images/play-button.png" RenderOptions.BitmapScalingMode="Fant" Height="30" Margin="2" MouseLeftButtonDown="PlayButton_OnMouseLeftButtonDown"></Image>
+								<Image x:Name="PauseButton" Source="Resource Images/pause.png" RenderOptions.BitmapScalingMode="Fant" Height="30" Margin="2" Visibility="Collapsed" MouseLeftButtonDown="PauseButton_OnMouseLeftButtonDown"></Image>
+							</Grid>
+							<Image x:Name="NextButton" Source="Resource Images/next.png" RenderOptions.BitmapScalingMode="Fant" Height="20" Margin="2"></Image>
 						</StackPanel>
 						<DockPanel Grid.Row="2">
 							<Grid DockPanel.Dock="Top">

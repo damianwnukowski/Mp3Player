@@ -46,7 +46,21 @@ namespace Mp3Player
 			{
 				Mp3Files.Add(new Mp3File(mp3Path));
 			}
+			Mp3Files.First().Play(this);
+		}
 
+		private void PlayButton_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			if (Mp3File.CurrentPlaying == null)
+				return;
+			Mp3File.CurrentPlaying.Play(this);
+		}
+
+		private void PauseButton_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			if (Mp3File.CurrentPlaying == null)
+				return;
+			Mp3File.CurrentPlaying.Pause(this);
 		}
 	}
 }
