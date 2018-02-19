@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using WMPLib;
@@ -16,35 +18,80 @@ namespace Mp3Player
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private BackgroundWorker backgroundWorker;
+		private BackgroundWorker _backgroundWorker;
+
 		public ObservableCollection<Mp3File> Mp3Files { get; set; }
 		public BitmapImage DefaultArtwork { get; }
 		public Mp3File CurrentPlaying { get; set; }
-
-		public WindowsMediaPlayer Player = new WindowsMediaPlayer();
+		public WindowsMediaPlayer Player;
 
 
 		public MainWindow()
 		{
 			InitializeComponent();
 			Mp3Files = new ObservableCollection<Mp3File>();
+			Player = new WindowsMediaPlayer();
 			DefaultArtwork = new BitmapImage();
 			DefaultArtwork.BeginInit();
 			DefaultArtwork.UriSource = new Uri("Resource Images/DefaultArtwork.png", UriKind.Relative);
 			DefaultArtwork.EndInit();
+			Player.PlayStateChange += PlayStateChange;
+			_backgroundWorker = new BackgroundWorker();
+			_backgroundWorker.DoWork += BackgroundWorker_DoWork;
+			_backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
+			_backgroundWorker.WorkerReportsProgress = true;
+			_backgroundWorker.RunWorkerAsync();
 		}
 
+		public void Play(Mp3File mp3File)
+		{
+			CurrentPlaying = mp3File;
+			AlbumCoverImage.Source = mp3File.AlbumCover != null ? CurrentPlaying.AlbumCover : DefaultArtwork;
+			Player.URL = mp3File.FilePath;
+			TitleTextBox.Text = CurrentPlaying.FullTitle;
+			var timeSpan = TimeSpan.FromSeconds(CurrentPlaying.MaxPosition);
+			MaxPositionTextBlock.Text = String.Format("{0}:{1:00}", timeSpan.Minutes, timeSpan.Seconds);
+		}
+
+		//change buttons from resume to pause
+		private void PlayStateChange(int newState)
+		{
+			switch (newState)
+			{
+				case (int)WMPPlayState.wmppsPlaying:
+					ResumeButton.Visibility = Visibility.Collapsed;
+					PauseButton.Visibility = Visibility.Visible;
+					break;			
+				default:
+					ResumeButton.Visibility = Visibility.Visible;
+					PauseButton.Visibility = Visibility.Collapsed;
+					break;
+
+			}
+		}
+		
 		private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
 			for (;;)
 			{
 				Thread.Sleep(5);
-				backgroundWorker.ReportProgress(DateTime.Now.Millisecond);
+				_backgroundWorker.ReportProgress(DateTime.Now.Millisecond);
 			}
 		}
-
 		private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
 		{
+
+			//On app start CurrentPlaying object is null so we must check for it before going further
+			if (CurrentPlaying == null)
+				return;
+			var index = Mp3Files.IndexOf(CurrentPlaying);
+			if (index < Mp3Files.Count - 1 && Player.playState==WMPPlayState.wmppsStopped)
+			{
+				Play(Mp3Files[index + 1]); //play next song when there is any and player stopped which happens only on media end, but because we can miss media end state we use this, which works fine
+			}
+			//Progress bar and time progress updating
+			var timeSpan = TimeSpan.FromSeconds(Player.controls.currentPosition);
+			CurrentPositionTextBlock.Text = String.Format("{0}:{1:00}", timeSpan.Minutes, timeSpan.Seconds);
 			ProgressBar.Value = Player.controls.currentPosition/CurrentPlaying.MaxPosition * 100;
 		}
 		
@@ -72,45 +119,22 @@ namespace Mp3Player
 		{
 			if (CurrentPlaying == null)
 				return;
-			Resume();
+			Player.controls.play();
 		}
 
 		private void PauseButton_OnClick(object sender, RoutedEventArgs e)
 		{
 			if (CurrentPlaying == null)
 				return;
-			Pause();
-		}
-
-		public void Play(Mp3File mp3File)
-		{
-			CurrentPlaying = mp3File;
-			AlbumCoverImage.Source = mp3File.AlbumCover != null ? CurrentPlaying.AlbumCover : DefaultArtwork;
-			Player.URL = mp3File.FilePath;
-			Player.controls.play();
-			TitleTextBox.Text = CurrentPlaying.FullTitle;
-			ResumeButton.Visibility = Visibility.Collapsed;
-			PauseButton.Visibility = Visibility.Visible;
-			//Progress bar and mp3 position updating
-			backgroundWorker = new BackgroundWorker();
-			backgroundWorker.DoWork += BackgroundWorker_DoWork;
-			backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
-			backgroundWorker.WorkerReportsProgress = true;
-			backgroundWorker.RunWorkerAsync();
-		}
-
-		public void Pause()
-		{
-			ResumeButton.Visibility = Visibility.Visible;
-			PauseButton.Visibility = Visibility.Collapsed;
 			Player.controls.pause();
-		}
+		}	
 
-		public void Resume()
+		//setting position of the mp3 file that is playing by pressing on progress bar
+		private void ProgressBar_OnMouseLeftButtonDown(object sender, MouseEventArgs e)
 		{
-			ResumeButton.Visibility = Visibility.Collapsed;
-			PauseButton.Visibility = Visibility.Visible;
-			Player.controls.play();
+			double percentagePosition = e.GetPosition(ProgressBar).X / ProgressBar.ActualWidth * 100;
+			if (CurrentPlaying != null && e.LeftButton == MouseButtonState.Pressed)			
+				Player.controls.currentPosition = percentagePosition/100*CurrentPlaying.MaxPosition;		
 		}
 	}
 }

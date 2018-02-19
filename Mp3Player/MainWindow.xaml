@@ -60,10 +60,10 @@
 									<ColumnDefinition></ColumnDefinition>
 									<ColumnDefinition></ColumnDefinition>
 								</Grid.ColumnDefinitions>
-								<TextBlock Grid.Column="0" HorizontalAlignment="Left" FontSize="8">0:00</TextBlock>
-								<TextBlock Grid.Column="1" HorizontalAlignment="Right" FontSize="8">0:00</TextBlock>
+								<TextBlock x:Name="CurrentPositionTextBlock" Grid.Column="0" HorizontalAlignment="Left" FontSize="8">0:00</TextBlock>
+								<TextBlock x:Name="MaxPositionTextBlock" Grid.Column="1" HorizontalAlignment="Right" FontSize="8">0:00</TextBlock>
 							</Grid>
-							<ProgressBar DockPanel.Dock="Bottom" Foreground="DodgerBlue" Value="0"  x:Name="ProgressBar"/>
+							<ProgressBar DockPanel.Dock="Bottom" Foreground="DodgerBlue" Value="0"  x:Name="ProgressBar" MouseLeftButtonDown="ProgressBar_OnMouseLeftButtonDown"/>
 						</DockPanel>
 					</Grid>
 				</DockPanel>
