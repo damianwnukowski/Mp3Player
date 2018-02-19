@@ -9,6 +9,17 @@
         Height="600" Width="400"
 		MinHeight="200" MinWidth="200"
         >
+	<Window.Resources>
+		<Style TargetType="{x:Type Button}" x:Key="ImageButtonStyle">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type Button}">
+						<ContentPresenter/>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</Window.Resources>
 	<DockPanel>
 		<Menu DockPanel.Dock="Top" >
 			<MenuItem Header="Open..." x:Name="OpenButton">
@@ -19,7 +30,7 @@
 		<Grid DockPanel.Dock="Bottom">
 			<DockPanel>
 				<DockPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
-					<Image x:Name="AlbumCover" DockPanel.Dock="Left"  Source="Resource Images/DefaultArtwork.png" Width="100" Height="100" Margin="3" RenderOptions.BitmapScalingMode="Fant"></Image>
+					<Image x:Name="AlbumCoverImage" DockPanel.Dock="Left"  Source="Resource Images/DefaultArtwork.png" Width="100" Height="100" Margin="3" RenderOptions.BitmapScalingMode="Fant"></Image>
 					<Grid DockPanel.Dock="Right">
 						<Grid.RowDefinitions>
 							<RowDefinition></RowDefinition>
@@ -28,12 +39,20 @@
 						</Grid.RowDefinitions>
 						<TextBox x:Name="TitleTextBox" VerticalAlignment ="Center" Margin="1" IsReadOnly="True" Grid.Row="0"></TextBox>
 						<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-							<Image x:Name="PreviousButton" Source="Resource Images/back.png" RenderOptions.BitmapScalingMode="Fant" Height="20" Margin="2"></Image>
+							<Button x:Name="PreviousButton" Height="20" Margin="2" Style="{StaticResource ImageButtonStyle}">
+								<Image  Source="Resource Images/back.png" RenderOptions.BitmapScalingMode="Fant"></Image>
+							</Button>
 							<Grid>
-								<Image x:Name="ResumeButton" Source="Resource Images/play-button.png" RenderOptions.BitmapScalingMode="Fant" Height="30" Margin="2" MouseLeftButtonDown="ResumeButton_OnMouseLeftButtonDown"></Image>
-								<Image x:Name="PauseButton" Source="Resource Images/pause.png" RenderOptions.BitmapScalingMode="Fant" Height="30" Margin="2" Visibility="Collapsed" MouseLeftButtonDown="PauseButton_OnMouseLeftButtonDown"></Image>
+								<Button x:Name="ResumeButton" Style="{StaticResource ImageButtonStyle}" Margin="2" Height="30" Click="ResumeButton_OnClick">
+									<Image  Source="Resource Images/play-button.png" RenderOptions.BitmapScalingMode="Fant"/>
+								</Button>
+								<Button x:Name="PauseButton" Margin="2" Visibility="Collapsed" Height="30" Style="{StaticResource ImageButtonStyle}" Click="PauseButton_OnClick">
+									<Image Source="Resource Images/pause.png" RenderOptions.BitmapScalingMode="Fant"/>
+								</Button>
 							</Grid>
-							<Image x:Name="NextButton" Source="Resource Images/next.png" RenderOptions.BitmapScalingMode="Fant" Height="20" Margin="2"></Image>
+							<Button x:Name="NextButton" Height="20" Margin="2" Style="{StaticResource ImageButtonStyle}">
+								<Image  Source="Resource Images/next.png" RenderOptions.BitmapScalingMode="Fant"></Image>
+							</Button>
 						</StackPanel>
 						<DockPanel Grid.Row="2">
 							<Grid DockPanel.Dock="Top">

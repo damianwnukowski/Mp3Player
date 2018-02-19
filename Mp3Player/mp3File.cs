@@ -10,9 +10,6 @@ namespace Mp3Player
 {
 	public class Mp3File
 	{
-		public static Mp3File CurrentPlaying { get; set; }
-		public static WindowsMediaPlayer Player = new WindowsMediaPlayer();
-
 		public double MaxPosition;
 		public string FilePath { get; }
 		public string Duration { get; }
@@ -33,9 +30,6 @@ namespace Mp3Player
 			}
 		}
 
-		
-
-
 		public Mp3File(string path)
 		{
 			FilePath = path;
@@ -54,37 +48,5 @@ namespace Mp3Player
 				AlbumCover.EndInit();
 			}
 		}
-
-		public void Play(MainWindow w)
-		{
-			CurrentPlaying = this;
-
-			if (AlbumCover != null)
-				w.AlbumCover.Source = AlbumCover;
-			else
-				w.AlbumCover.Source = w.DefaultArtwork;
-
-			Player.URL = FilePath;
-			Player.controls.play();
-			w.TitleTextBox.Text = CurrentPlaying.FullTitle;
-			w.ResumeButton.Visibility = Visibility.Collapsed;
-			w.PauseButton.Visibility = Visibility.Visible;
-
-		}
-
-		public void Pause(MainWindow w)
-		{
-			w.ResumeButton.Visibility = Visibility.Visible;
-			w.PauseButton.Visibility = Visibility.Collapsed;
-			Player.controls.pause();
-		}
-
-		public void Resume(MainWindow w)
-		{
-			w.ResumeButton.Visibility = Visibility.Collapsed;
-			w.PauseButton.Visibility = Visibility.Visible;
-			Player.controls.play();
-		}
-
 	}
 }

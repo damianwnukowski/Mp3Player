@@ -29,6 +29,8 @@ namespace Mp3Player
 	{
 		public ObservableCollection<Mp3File> Mp3Files { get; set; }
 		public BitmapImage DefaultArtwork { get; }
+		public Mp3File CurrentPlaying { get; set; }
+		public WindowsMediaPlayer Player = new WindowsMediaPlayer();
 
 		public MainWindow()
 		{
@@ -39,6 +41,7 @@ namespace Mp3Player
 			DefaultArtwork.UriSource = new Uri("Resource Images/DefaultArtwork.png", UriKind.Relative);
 			DefaultArtwork.EndInit();
 		}
+
 
 		private void OpenButton_OnClick(object sender, RoutedEventArgs e)
 		{
@@ -56,25 +59,48 @@ namespace Mp3Player
 				{
 					Mp3Files.Add(new Mp3File(openFileDialog.FileNames[i]));
 				}
-				firstMp3.Play(this);
+				Play(firstMp3);
 			}
-
 		}
 
-		private void ResumeButton_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		private void ResumeButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			if (Mp3File.CurrentPlaying == null)
+			if (CurrentPlaying == null)
 				return;
-			Mp3File.CurrentPlaying.Resume(this);
+			Resume();
 		}
 
-		private void PauseButton_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		private void PauseButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			if (Mp3File.CurrentPlaying == null)
+			if (CurrentPlaying == null)
 				return;
-			Mp3File.CurrentPlaying.Pause(this);
+			Pause();
 		}
 
-		
+		public void Play(Mp3File mp3File)
+		{
+			CurrentPlaying = mp3File;
+			AlbumCoverImage.Source = mp3File.AlbumCover != null ? CurrentPlaying.AlbumCover : DefaultArtwork;
+			Player.URL = mp3File.FilePath;
+			Player.controls.play();
+			TitleTextBox.Text = CurrentPlaying.FullTitle;
+			ResumeButton.Visibility = Visibility.Collapsed;
+			PauseButton.Visibility = Visibility.Visible;
+		}
+
+		public void Pause()
+		{
+			ResumeButton.Visibility = Visibility.Visible;
+			PauseButton.Visibility = Visibility.Collapsed;
+			Player.controls.pause();
+		}
+
+		public void Resume()
+		{
+			ResumeButton.Visibility = Visibility.Collapsed;
+			PauseButton.Visibility = Visibility.Visible;
+			Player.controls.play();
+		}
+	
 	}
 }
