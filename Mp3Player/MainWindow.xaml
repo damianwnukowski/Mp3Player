@@ -19,7 +19,7 @@
 		<Grid DockPanel.Dock="Bottom">
 			<DockPanel>
 				<DockPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
-					<Image DockPanel.Dock="Left"  Source="Resource Images/DefaultArtwork.png" Width="100"></Image>
+					<Image x:Name="AlbumCover" DockPanel.Dock="Left"  Source="Resource Images/DefaultArtwork.png" Width="100" Height="100" Margin="3" RenderOptions.BitmapScalingMode="Fant"></Image>
 					<Grid DockPanel.Dock="Right">
 						<Grid.RowDefinitions>
 							<RowDefinition></RowDefinition>
@@ -30,7 +30,7 @@
 						<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
 							<Image x:Name="PreviousButton" Source="Resource Images/back.png" RenderOptions.BitmapScalingMode="Fant" Height="20" Margin="2"></Image>
 							<Grid>
-								<Image x:Name="PlayButton" Source="Resource Images/play-button.png" RenderOptions.BitmapScalingMode="Fant" Height="30" Margin="2" MouseLeftButtonDown="PlayButton_OnMouseLeftButtonDown"></Image>
+								<Image x:Name="ResumeButton" Source="Resource Images/play-button.png" RenderOptions.BitmapScalingMode="Fant" Height="30" Margin="2" MouseLeftButtonDown="ResumeButton_OnMouseLeftButtonDown"></Image>
 								<Image x:Name="PauseButton" Source="Resource Images/pause.png" RenderOptions.BitmapScalingMode="Fant" Height="30" Margin="2" Visibility="Collapsed" MouseLeftButtonDown="PauseButton_OnMouseLeftButtonDown"></Image>
 							</Grid>
 							<Image x:Name="NextButton" Source="Resource Images/next.png" RenderOptions.BitmapScalingMode="Fant" Height="20" Margin="2"></Image>
@@ -44,7 +44,7 @@
 								<TextBlock Grid.Column="0" HorizontalAlignment="Left" FontSize="8">0:00</TextBlock>
 								<TextBlock Grid.Column="1" HorizontalAlignment="Right" FontSize="8">0:00</TextBlock>
 							</Grid>
-							<ProgressBar DockPanel.Dock="Bottom"></ProgressBar>
+							<ProgressBar DockPanel.Dock="Bottom" Foreground="DodgerBlue"  Value="0" Name="ProgressBar"/>
 						</DockPanel>
 					</Grid>
 				</DockPanel>
