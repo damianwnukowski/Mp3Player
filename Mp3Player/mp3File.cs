@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Windows;
 using System.Windows.Media.Imaging;
-using WMPLib;
 using File = TagLib.File;
 
 
@@ -10,7 +8,7 @@ namespace Mp3Player
 {
 	public class Mp3File
 	{
-		public double MaxPosition;
+		public double MaxPosition { get; }
 		public string FilePath { get; }
 		public string Duration { get; }
 		public string Title { get; }
@@ -37,6 +35,7 @@ namespace Mp3Player
 			Duration = String.Format("{0}:{1:00}", f.Properties.Duration.Minutes, f.Properties.Duration.Seconds);
 			Title = f.Tag.Title;
 			Author = f.Tag.FirstPerformer;
+			MaxPosition = f.Properties.Duration.TotalSeconds;
 
 			//retrieving album cover as byte array and convering it into bitmapimage
 			if (f.Tag.Pictures.Length != 0)

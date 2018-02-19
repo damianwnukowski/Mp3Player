@@ -63,7 +63,7 @@
 								<TextBlock Grid.Column="0" HorizontalAlignment="Left" FontSize="8">0:00</TextBlock>
 								<TextBlock Grid.Column="1" HorizontalAlignment="Right" FontSize="8">0:00</TextBlock>
 							</Grid>
-							<ProgressBar DockPanel.Dock="Bottom" Foreground="DodgerBlue"  Value="0" Name="ProgressBar"/>
+							<ProgressBar DockPanel.Dock="Bottom" Foreground="DodgerBlue" Value="0"  x:Name="ProgressBar"/>
 						</DockPanel>
 					</Grid>
 				</DockPanel>

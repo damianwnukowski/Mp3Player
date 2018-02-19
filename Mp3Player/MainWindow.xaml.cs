@@ -1,20 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Media;
 using Microsoft.Win32;
 using WMPLib;
 
@@ -27,10 +16,13 @@ namespace Mp3Player
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private BackgroundWorker backgroundWorker;
 		public ObservableCollection<Mp3File> Mp3Files { get; set; }
 		public BitmapImage DefaultArtwork { get; }
 		public Mp3File CurrentPlaying { get; set; }
+
 		public WindowsMediaPlayer Player = new WindowsMediaPlayer();
+
 
 		public MainWindow()
 		{
@@ -42,7 +34,20 @@ namespace Mp3Player
 			DefaultArtwork.EndInit();
 		}
 
+		private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+		{
+			for (;;)
+			{
+				Thread.Sleep(5);
+				backgroundWorker.ReportProgress(DateTime.Now.Millisecond);
+			}
+		}
 
+		private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+		{
+			ProgressBar.Value = Player.controls.currentPosition/CurrentPlaying.MaxPosition * 100;
+		}
+		
 		private void OpenButton_OnClick(object sender, RoutedEventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -86,6 +91,12 @@ namespace Mp3Player
 			TitleTextBox.Text = CurrentPlaying.FullTitle;
 			ResumeButton.Visibility = Visibility.Collapsed;
 			PauseButton.Visibility = Visibility.Visible;
+			//Progress bar and mp3 position updating
+			backgroundWorker = new BackgroundWorker();
+			backgroundWorker.DoWork += BackgroundWorker_DoWork;
+			backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
+			backgroundWorker.WorkerReportsProgress = true;
+			backgroundWorker.RunWorkerAsync();
 		}
 
 		public void Pause()
@@ -101,6 +112,5 @@ namespace Mp3Player
 			PauseButton.Visibility = Visibility.Visible;
 			Player.controls.play();
 		}
-	
 	}
 }
