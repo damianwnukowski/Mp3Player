@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
@@ -85,9 +85,12 @@ namespace Mp3Player
 			if (CurrentPlaying == null)
 				return;
 			var index = Mp3Files.IndexOf(CurrentPlaying);
-			if (index < Mp3Files.Count - 1 && Player.playState==WMPPlayState.wmppsStopped)
+			if (Player.playState==WMPPlayState.wmppsStopped)
 			{
-				Play(Mp3Files[index + 1]); //play next song when there is any and player stopped which happens only on media end, but because we can miss media end state we use this, which works fine
+				if(index < Mp3Files.Count - 1)
+					Play(Mp3Files[index + 1]); //play next song when there is any and player stopped which happens only on media end, but because we can miss media end state we use this, which works fine
+				else
+					Play(Mp3Files[0]);
 			}
 			//Progress bar and time progress updating
 			var timeSpan = TimeSpan.FromSeconds(Player.controls.currentPosition);
@@ -97,9 +100,11 @@ namespace Mp3Player
 		
 		private void OpenButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Multiselect = true;
-			openFileDialog.Filter = "mp3 files (*.mp3)|*.mp3";
+			OpenFileDialog openFileDialog = new OpenFileDialog
+			{
+				Multiselect = true,
+				Filter = "mp3 files (*.mp3)|*.mp3"
+			};
 			openFileDialog.ShowDialog();
 
 
@@ -135,6 +140,48 @@ namespace Mp3Player
 			double percentagePosition = e.GetPosition(ProgressBar).X / ProgressBar.ActualWidth * 100;
 			if (CurrentPlaying != null && e.LeftButton == MouseButtonState.Pressed)			
 				Player.controls.currentPosition = percentagePosition/100*CurrentPlaying.MaxPosition;		
+		}
+
+		private void NextButton_OnClick(object sender, RoutedEventArgs e)
+		{
+			if (CurrentPlaying == null)
+				return;
+			var index = Mp3Files.IndexOf(CurrentPlaying);
+			if (index < Mp3Files.Count - 1)
+			{
+				Play(Mp3Files[index + 1]);
+			}
+			else
+			{
+				Play(Mp3Files[0]);
+			}
+		}
+
+		private void PreviousButton_OnClick(object sender, RoutedEventArgs e)
+		{
+			if (CurrentPlaying == null)
+				return;
+			var index = Mp3Files.IndexOf(CurrentPlaying);
+			if (index > 0)  
+			{
+				Play(Mp3Files[index - 1]);
+			}
+			else
+			{
+				Play(Mp3Files[Mp3Files.Count-1]);
+			}
+		}
+
+		private void ListViewItemHandleDoubleClick(object sender, RoutedEventArgs e)
+		{
+			Mp3File mp3File = (Mp3File)((ListViewItem)sender).Content;
+			Play(mp3File);
+		}
+
+		private void ListViewItemHandleKeyDown(object sender, KeyEventArgs e)
+		{
+			if(e.Key==Key.Enter) //does the same what doubleclick just checks if the key was enter
+				ListViewItemHandleDoubleClick(sender, e);
 		}
 	}
 }

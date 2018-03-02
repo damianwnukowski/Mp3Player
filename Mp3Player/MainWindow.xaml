@@ -19,6 +19,10 @@
 				</Setter.Value>
 			</Setter>
 		</Style>
+		<Style x:Key="ItemStyle" TargetType="{x:Type ListViewItem}">
+			<EventSetter Event="MouseDoubleClick" Handler="ListViewItemHandleDoubleClick" />
+			<EventSetter Event="KeyDown" Handler="ListViewItemHandleKeyDown" />
+		</Style>
 	</Window.Resources>
 	<DockPanel>
 		<Menu DockPanel.Dock="Top" >
@@ -39,7 +43,7 @@
 						</Grid.RowDefinitions>
 						<TextBox x:Name="TitleTextBox" VerticalAlignment ="Center" Margin="1" IsReadOnly="True" Grid.Row="0"></TextBox>
 						<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-							<Button x:Name="PreviousButton" Height="20" Margin="2" Style="{StaticResource ImageButtonStyle}">
+							<Button x:Name="PreviousButton" Height="20" Margin="2" Style="{StaticResource ImageButtonStyle}" Click="PreviousButton_OnClick">
 								<Image  Source="Resource Images/back.png" RenderOptions.BitmapScalingMode="Fant"></Image>
 							</Button>
 							<Grid>
@@ -50,7 +54,7 @@
 									<Image Source="Resource Images/pause.png" RenderOptions.BitmapScalingMode="Fant"/>
 								</Button>
 							</Grid>
-							<Button x:Name="NextButton" Height="20" Margin="2" Style="{StaticResource ImageButtonStyle}">
+							<Button x:Name="NextButton" Height="20" Margin="2" Style="{StaticResource ImageButtonStyle}" Click="NextButton_OnClick">
 								<Image  Source="Resource Images/next.png" RenderOptions.BitmapScalingMode="Fant"></Image>
 							</Button>
 						</StackPanel>
@@ -67,7 +71,7 @@
 						</DockPanel>
 					</Grid>
 				</DockPanel>
-				<ListView DockPanel.Dock="Top" x:Name="ListView" ItemsSource="{Binding Path=Mp3Files, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+				<ListView DockPanel.Dock="Top" x:Name="ListView" ItemsSource="{Binding Path=Mp3Files, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" ItemContainerStyle="{StaticResource ItemStyle}">
 					<ListView.View>
 						<GridView>
 							<GridViewColumn Header="Title" Width="300" DisplayMemberBinding="{Binding Path=FullTitle}"/>
