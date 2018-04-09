@@ -28,7 +28,7 @@
 		<Menu DockPanel.Dock="Top" >
 			<MenuItem Header="Open..." x:Name="OpenButton">
 				<MenuItem Header="Open File" Click="OpenButton_OnClick"></MenuItem>
-				<MenuItem Header="Open Directory"></MenuItem>
+				<MenuItem Header="Open Directory" Click="OpenDirectory_OnClick"></MenuItem>
 			</MenuItem>
 		</Menu>
 		<Grid DockPanel.Dock="Bottom">

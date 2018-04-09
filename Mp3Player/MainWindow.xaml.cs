@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using WMPLib;
 
 namespace Mp3Player
@@ -21,21 +23,21 @@ namespace Mp3Player
 		private BackgroundWorker _backgroundWorker;
 
 		public ObservableCollection<Mp3File> Mp3Files { get; set; }
-		public BitmapImage DefaultArtwork { get; }
-		public Mp3File CurrentPlaying { get; set; }
-		public WindowsMediaPlayer Player;
+		private BitmapImage _defaultArtwork { get; }
+		private Mp3File _currentPlaying { get; set; }
+		private WindowsMediaPlayer _player;
 
 
 		public MainWindow()
 		{
 			InitializeComponent();
 			Mp3Files = new ObservableCollection<Mp3File>();
-			Player = new WindowsMediaPlayer();
-			DefaultArtwork = new BitmapImage();
-			DefaultArtwork.BeginInit();
-			DefaultArtwork.UriSource = new Uri("Resource Images/DefaultArtwork.png", UriKind.Relative);
-			DefaultArtwork.EndInit();
-			Player.PlayStateChange += PlayStateChange;
+			_player = new WindowsMediaPlayer();
+			_defaultArtwork = new BitmapImage();
+			_defaultArtwork.BeginInit();
+			_defaultArtwork.UriSource = new Uri("Resource Images/DefaultArtwork.png", UriKind.Relative);
+			_defaultArtwork.EndInit();
+			_player.PlayStateChange += PlayStateChange;
 			_backgroundWorker = new BackgroundWorker();
 			_backgroundWorker.DoWork += BackgroundWorker_DoWork;
 			_backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
@@ -45,11 +47,11 @@ namespace Mp3Player
 
 		public void Play(Mp3File mp3File)
 		{
-			CurrentPlaying = mp3File;
-			AlbumCoverImage.Source = mp3File.AlbumCover != null ? CurrentPlaying.AlbumCover : DefaultArtwork;
-			Player.URL = mp3File.FilePath;
-			TitleTextBox.Text = CurrentPlaying.FullTitle;
-			var timeSpan = TimeSpan.FromSeconds(CurrentPlaying.MaxPosition);
+			_currentPlaying = mp3File;
+			AlbumCoverImage.Source = mp3File.AlbumCover != null ? _currentPlaying.AlbumCover : _defaultArtwork;
+			_player.URL = mp3File.FilePath;
+			TitleTextBox.Text = _currentPlaying.FullTitle;
+			var timeSpan = TimeSpan.FromSeconds(_currentPlaying.MaxPosition);
 			MaxPositionTextBlock.Text = String.Format("{0}:{1:00}", timeSpan.Minutes, timeSpan.Seconds);
 		}
 
@@ -82,10 +84,10 @@ namespace Mp3Player
 		{
 
 			//On app start CurrentPlaying object is null so we must check for it before going further
-			if (CurrentPlaying == null)
+			if (_currentPlaying == null)
 				return;
-			var index = Mp3Files.IndexOf(CurrentPlaying);
-			if (Player.playState==WMPPlayState.wmppsStopped)
+			var index = Mp3Files.IndexOf(_currentPlaying);
+			if (_player.playState==WMPPlayState.wmppsStopped)
 			{
 				if(index < Mp3Files.Count - 1)
 					Play(Mp3Files[index + 1]); //play next song when there is any and player stopped which happens only on media end, but because we can miss media end state we use this, which works fine
@@ -93,9 +95,9 @@ namespace Mp3Player
 					Play(Mp3Files[0]);
 			}
 			//Progress bar and time progress updating
-			var timeSpan = TimeSpan.FromSeconds(Player.controls.currentPosition);
+			var timeSpan = TimeSpan.FromSeconds(_player.controls.currentPosition);
 			CurrentPositionTextBlock.Text = String.Format("{0}:{1:00}", timeSpan.Minutes, timeSpan.Seconds);
-			ProgressBar.Value = Player.controls.currentPosition/CurrentPlaying.MaxPosition * 100;
+			ProgressBar.Value = _player.controls.currentPosition/_currentPlaying.MaxPosition * 100;
 		}
 		
 		private void OpenButton_OnClick(object sender, RoutedEventArgs e)
@@ -120,33 +122,52 @@ namespace Mp3Player
 			}
 		}
 
+		private void OpenDirectory_OnClick(object sender, RoutedEventArgs e)
+		{
+			CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+			dialog.InitialDirectory = "C:\\Users";
+			dialog.IsFolderPicker = true;
+			if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+			{
+				var files = Directory.GetFiles(dialog.FileName, "*.mp3");
+				Mp3File firstMp3 = new Mp3File(files[0]);
+				Mp3Files.Add(firstMp3);
+				for (int i = 1; i < files.Length; i++)
+				{
+					Mp3Files.Add(new Mp3File(files[i]));
+				}
+				Play(firstMp3);
+			}
+		}
+
+
 		private void ResumeButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			if (CurrentPlaying == null)
+			if (_currentPlaying == null)
 				return;
-			Player.controls.play();
+			_player.controls.play();
 		}
 
 		private void PauseButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			if (CurrentPlaying == null)
+			if (_currentPlaying == null)
 				return;
-			Player.controls.pause();
+			_player.controls.pause();
 		}	
 
 		//setting position of the mp3 file that is playing by pressing on progress bar
 		private void ProgressBar_OnMouseLeftButtonDown(object sender, MouseEventArgs e)
 		{
 			double percentagePosition = e.GetPosition(ProgressBar).X / ProgressBar.ActualWidth * 100;
-			if (CurrentPlaying != null && e.LeftButton == MouseButtonState.Pressed)			
-				Player.controls.currentPosition = percentagePosition/100*CurrentPlaying.MaxPosition;		
+			if (_currentPlaying != null && e.LeftButton == MouseButtonState.Pressed)			
+				_player.controls.currentPosition = percentagePosition/100*_currentPlaying.MaxPosition;		
 		}
 
 		private void NextButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			if (CurrentPlaying == null)
+			if (_currentPlaying == null)
 				return;
-			var index = Mp3Files.IndexOf(CurrentPlaying);
+			var index = Mp3Files.IndexOf(_currentPlaying);
 			if (index < Mp3Files.Count - 1)
 			{
 				Play(Mp3Files[index + 1]);
@@ -159,9 +180,9 @@ namespace Mp3Player
 
 		private void PreviousButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			if (CurrentPlaying == null)
+			if (_currentPlaying == null)
 				return;
-			var index = Mp3Files.IndexOf(CurrentPlaying);
+			var index = Mp3Files.IndexOf(_currentPlaying);
 			if (index > 0)  
 			{
 				Play(Mp3Files[index - 1]);
